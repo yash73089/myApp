@@ -1,0 +1,18 @@
+node {
+    stage('GIT CHECKOUT'){
+        git 'https://github.com/yash73089/myApp'        
+    }
+    stage('MAVEN BUILD'){
+        def mavenhome = tool name: 'localmaven', type: 'maven'
+        sh "${mavenhome}/bin/mvn clean package"
+    }
+    stage('Deploy to tomcat'){
+        sh 'mkdir /opt/tomcat7/backup/`date +"%d_%m_%y_%H"`'
+        sh 'cp -r /opt/tomcat7/webapps/*.war /opt/tomcat7/backup/`date +"%d_%m_%y_%H"`'
+        sh 'cp -r target/*.war /opt/tomcat7/webapps/'
+    }
+    stage('Integration Testing'){
+        sh 'chmod +x test_um_nose.py'
+        sh '/usr/local/bin/nosetests -v test_um_nose.py'
+    }
+}
